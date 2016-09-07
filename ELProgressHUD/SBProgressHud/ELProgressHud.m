@@ -8,8 +8,8 @@
 
 #import "ELProgressHud.h"
 
-CGFloat const width = 160;
-CGFloat const height = 120;
+CGFloat width = 160;
+CGFloat height = 120;
 CGFloat const ELProgressHudTag = 962;
 @interface ELProgressHud ()
 
@@ -19,6 +19,9 @@ CGFloat const ELProgressHudTag = 962;
 @property (nonatomic, strong) UIProgressView *ELProgressView;
 @property (nonatomic, strong) UILabel *ELProgressLabel;
 @property (nonatomic, strong) UIButton *ELCancelButton;
+@property (nonatomic, strong) UIImageView *ELImageView;
+@property (nonatomic, strong) CAShapeLayer *ELCircleShapeLayer;
+@property (nonatomic, strong) CAShapeLayer *ELProgressShapeLayer;
 
 @end
 
@@ -51,22 +54,19 @@ CGFloat const ELProgressHudTag = 962;
     self.mainView.frame = CGRectMake(0, 0, width, height);
     self.mainView.center = CGPointMake(CGRectGetMidX([UIScreen mainScreen].bounds), CGRectGetMidY([UIScreen mainScreen].bounds) - 20);
     [self addSubview:self.mainView];
-    
     switch (_hudType) {
         case ELProgressHudTypeIndicator:
         {
-            CGRect rect = self.mainView.frame;
-            CGPoint center = self.mainView.center;
-            rect.size = CGSizeMake(80, 80);
-            self.mainView.frame = rect;
-            self.mainView.center = center;
+            width = 80;
+            height = 80;
             self.ELActivityIndicatorView.frame = CGRectMake(0, 0, 50, 50);
-            self.ELActivityIndicatorView.center = CGPointMake(rect.size.width / 2, rect.size.height / 2);
+            self.ELActivityIndicatorView.center = CGPointMake(width / 2, height / 2);
             [self.mainView addSubview:self.ELActivityIndicatorView];
         }
             break;
         case ELProgressHudTypeText:
         {
+            height = 60;
             self.textLabel.frame = CGRectMake(0, 0, width, 44);
             self.textLabel.center = CGPointMake(width / 2, height / 2);
             [self.mainView addSubview:self.textLabel];
@@ -74,6 +74,7 @@ CGFloat const ELProgressHudTag = 962;
             break;
         case ELProgressHudTypeProgress:
         {
+            height = 80;
             [self setupELProgressLabel];
             [self setupELProgressView];
             [self.mainView addSubview:self.ELProgressLabel];
@@ -110,9 +111,32 @@ CGFloat const ELProgressHudTag = 962;
             [self.mainView addSubview:self.textLabel];
         }
             break;
+        case ELProgressHudTypeGif:
+        {
+            self.ELImageView.frame = self.mainView.bounds;
+            [self.mainView addSubview:self.ELImageView];
+        }
+            break;
+        case ELProgressHudTypeDrawCircle:
+        {
+            width = 120;
+            self.ELProgressShapeLayer.frame = self.mainView.bounds;
+            self.ELCircleShapeLayer.frame = self.mainView.bounds;
+            [self.mainView.layer addSublayer:self.ELCircleShapeLayer];
+            [self.mainView.layer addSublayer:self.ELProgressShapeLayer];
+            self.ELProgressLabel.frame = CGRectMake(0, 0, width * 0.5, 30);
+            self.ELProgressLabel.center = CGPointMake(width / 2, height / 2);
+            [self.mainView addSubview:self.ELProgressLabel];
+        }
+            break;
         default:
             break;
     }
+}
+
+- (void)layoutSubviews {
+    self.mainView.frame = CGRectMake(0, 0, width, height);
+    self.mainView.center = CGPointMake(CGRectGetMidX([UIScreen mainScreen].bounds), CGRectGetMidY([UIScreen mainScreen].bounds) - 20);
 }
 
 - (void)setupELActivityIndicatorView {
@@ -150,6 +174,8 @@ CGFloat const ELProgressHudTag = 962;
     if (hud) {
         hud.mainView = nil;
         hud.ELActivityIndicatorView = nil;
+        width = 160;
+        height = 120;
         [hud removeFromSuperview];
         hud = nil;
     }
@@ -169,6 +195,8 @@ CGFloat const ELProgressHudTag = 962;
 - (void)hide {
     self.mainView = nil;
     self.ELActivityIndicatorView = nil;
+    width = 160;
+    height = 120;
     [self removeFromSuperview];
 }
 
@@ -219,10 +247,15 @@ CGFloat const ELProgressHudTag = 962;
 }
 
 - (void)setEl_progress:(float)el_progress {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    if ([NSThread isMainThread]) {
         [self.ELProgressView setProgress:el_progress animated:YES];
-        [self.ELProgressLabel setText:[NSString stringWithFormat:@"%.2f%%", el_progress]];
-    });
+        [self.ELProgressLabel setText:[NSString stringWithFormat:@"%.2f%%", el_progress * 100]];
+    }else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.ELProgressView setProgress:el_progress animated:YES];
+            [self.ELProgressLabel setText:[NSString stringWithFormat:@"%.2f%%", el_progress * 100]];
+        });
+    }
 }
 
 - (UILabel *)ELProgressLabel {
@@ -242,6 +275,55 @@ CGFloat const ELProgressHudTag = 962;
         [_ELCancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
     }
     return _ELCancelButton;
+}
+
+- (UIImageView *)ELImageView {
+    if (!_ELImageView) {
+        _ELImageView = [[UIImageView alloc] init];
+        _ELImageView.alpha = 0.5;
+    }
+    return _ELImageView;
+}
+
+- (void)setEl_images:(NSArray<NSString *> *)el_images {
+    NSMutableArray *imageArray = [NSMutableArray array];
+    for (NSString *imageName in el_images) {
+        UIImage *image = [UIImage imageNamed:imageName];
+        [imageArray addObject:image];
+    }
+    self.ELImageView.animationImages = imageArray;
+    [self.ELImageView startAnimating];
+}
+
+- (CAShapeLayer *)ELCircleShapeLayer {
+    if (!_ELCircleShapeLayer) {
+        UIBezierPath *path = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(width * (1 - 0.6) / 2, height * (1 - 0.6) / 2, width * 0.6, height * 0.6)];
+        _ELCircleShapeLayer = [CAShapeLayer layer];
+        _ELCircleShapeLayer.fillColor = [UIColor clearColor].CGColor;
+        _ELCircleShapeLayer.strokeColor=[UIColor orangeColor].CGColor;
+        _ELCircleShapeLayer.path = path.CGPath;
+        _ELCircleShapeLayer.lineWidth = 3;
+    }
+    return _ELCircleShapeLayer;
+}
+
+- (CAShapeLayer *)ELProgressShapeLayer {
+    if (!_ELProgressShapeLayer) {
+        UIBezierPath *path = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(width * (1 - 0.6) / 2, height * (1 - 0.6) / 2, width * 0.6, height * 0.6)];
+        _ELProgressShapeLayer = [CAShapeLayer layer];
+        _ELProgressShapeLayer.fillColor = [UIColor clearColor].CGColor;
+        _ELProgressShapeLayer.strokeColor=[UIColor whiteColor].CGColor;
+        _ELProgressShapeLayer.path = path.CGPath;
+        _ELProgressShapeLayer.lineWidth = 3;
+    }
+    return _ELProgressShapeLayer;
+}
+
+- (void)setEl_strokeStart:(CGFloat)el_strokeStart {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.ELProgressShapeLayer.strokeStart = el_strokeStart;
+        [self.ELProgressLabel setText:[NSString stringWithFormat:@"%.2f%%", el_strokeStart * 100]];
+    });
 }
 
 @end

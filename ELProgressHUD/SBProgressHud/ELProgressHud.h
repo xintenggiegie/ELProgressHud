@@ -14,7 +14,9 @@ typedef NS_ENUM(NSUInteger, ELProgressHudType) {
     ELProgressHudTypeProgress,   // 进度
     ELProgressHudTypeProgressWithCancel, // 带取消动作
     ELProgressHudTypeIndicatorAndText, // 菊花和文本的组合
-    ELProgressHudTypeProgressAndText // 进度和文本的组合
+    ELProgressHudTypeProgressAndText, // 进度和文本的组合
+    ELProgressHudTypeGif,              // gif图片
+    ELProgressHudTypeDrawCircle    // 画圈圈
 };
 
 typedef void(^ELCompletion)(void);
@@ -46,6 +48,14 @@ typedef void(^ELCompletion)(void);
  *  ELProgressHudTypeProgressWithCancel cancel callBack
  */
 @property (nonatomic, copy) ELCompletion elCompletion;
+
+/**
+ *  ELProgressHudTypeGif image's name array for gif
+ */
+@property (nonatomic, strong) NSArray <NSString *>*el_images;
+
+
+@property (nonatomic, assign) CGFloat el_strokeStart;
 
 /**
  *  initial hud with a type

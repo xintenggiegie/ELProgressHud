@@ -28,6 +28,8 @@
     
     [self.view addSubview:self.tableView];
     
+    
+    
 }
 
 #pragma mark - tableView dataSource
@@ -79,6 +81,7 @@
                 hud.el_progress = 1.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount;
                 
             } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+                NSLog(@"%@", targetPath);
                 return targetPath;
             } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
                 [ELProgressHud hideHudAtView:self.view];
@@ -137,6 +140,34 @@
             [task resume];
         }
             break;
+        case ELProgressHudTypeGif:
+        {
+            ELProgressHud *hud = [[ELProgressHud alloc] initWithHudType:ELProgressHudTypeGif];
+            hud.el_images = @[@"11", @"12", @"13", @"14"];
+            [hud showHudAtView:self.view];
+            [self performSelector:@selector(hide) withObject:nil afterDelay:5.0];
+        }
+            break;
+        case ELProgressHudTypeDrawCircle:
+        {
+            ELProgressHud *hud = [[ELProgressHud alloc] initWithHudType:ELProgressHudTypeDrawCircle];
+            [hud showHudAtView:self.view];
+         
+            
+            AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:nil];
+            NSURLSessionDownloadTask *task = [manager downloadTaskWithRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://flv2.bn.netease.com/videolib3/1607/14/SrqDm6658/SD/SrqDm6658-mobile.mp4"]] progress:^(NSProgress * _Nonnull downloadProgress) {
+                
+                hud.el_strokeStart = 1.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount;
+                
+            } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+                return targetPath;
+            } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+                [ELProgressHud hideHudAtView:self.view];
+            }];
+            
+            [task resume];
+        }
+            break;
         default:
             break;
     }
@@ -160,7 +191,7 @@
 
 - (NSMutableArray *)dataSource {
     if (!_dataSource) {
-        _dataSource = [NSMutableArray arrayWithArray:@[@"ELProgressHudTypeIndicator", @"ELProgressHudTypeText", @"ELProgressHudTypeProgress", @"ELProgressHudTypeProgressWithCancel", @"ELProgressHudTypeIndicatorAndText", @"ELProgressHudTypeProgressAndText"]];
+        _dataSource = [NSMutableArray arrayWithArray:@[@"ELProgressHudTypeIndicator", @"ELProgressHudTypeText", @"ELProgressHudTypeProgress", @"ELProgressHudTypeProgressWithCancel", @"ELProgressHudTypeIndicatorAndText", @"ELProgressHudTypeProgressAndText", @"ELProgressHudTypeGif", @"ELProgressHudTypeDrawCircle"]];
     }
     return _dataSource;
 }
