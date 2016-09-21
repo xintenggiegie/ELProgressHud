@@ -153,7 +153,7 @@
             ELProgressHud *hud = [[ELProgressHud alloc] initWithHudType:ELProgressHudTypeDrawCircle];
             [hud showHudAtView:self.view];
          
-            
+            NSTimer
             AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:nil];
             NSURLSessionDownloadTask *task = [manager downloadTaskWithRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://flv2.bn.netease.com/videolib3/1607/14/SrqDm6658/SD/SrqDm6658-mobile.mp4"]] progress:^(NSProgress * _Nonnull downloadProgress) {
                 
