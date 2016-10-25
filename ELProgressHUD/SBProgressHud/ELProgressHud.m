@@ -38,6 +38,14 @@ CGFloat const ELProgressHudTag = 962;
     return self;
 }
 
+- (instancetype)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        
+    }
+    return self;
+}
+
 - (instancetype)initWithHudType:(ELProgressHudType)hudType {
     self = [super init];
     if (self) {
