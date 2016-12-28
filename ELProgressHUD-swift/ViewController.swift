@@ -59,6 +59,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     // MARK: tableView delegate
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
         switch indexPath.section {
         case ELProgressHud.ELProgressHudType.ELProgressHudTypeIndicator.hashValue:
             ELProgressHud.showHudAtView(aView: self.view)

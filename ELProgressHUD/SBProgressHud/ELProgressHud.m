@@ -25,7 +25,10 @@ CGFloat const ELProgressHudTag = 962;
 
 @end
 
-@implementation ELProgressHud
+@implementation ELProgressHud {
+    CGFloat _width;
+    CGFloat _height;
+}
 
 #pragma mark - initialize hud
 
@@ -143,6 +146,8 @@ CGFloat const ELProgressHudTag = 962;
 }
 
 - (void)layoutSubviews {
+    [super layoutSubviews];
+    
     self.mainView.frame = CGRectMake(0, 0, width, height);
     self.mainView.center = CGPointMake(CGRectGetMidX([UIScreen mainScreen].bounds), CGRectGetMidY([UIScreen mainScreen].bounds) - 20);
 }
